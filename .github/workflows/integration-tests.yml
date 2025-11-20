@@ -62,8 +62,8 @@ jobs:
           APP_PORT=8000
           ENVIRONMENT=production
           DEBUG=false
-          CELERY_BROKER_URL=redis://localhost:6379/0
-          CELERY_RESULT_BACKEND=redis://localhost:6379/0
+          CELERY_BROKER_URL=redis://redis:6379/0
+          CELERY_RESULT_BACKEND=redis://redis:6379/0
           ENABLE_CORS=false
           DISABLE_SIGNUP=false
           RATE_LIMITING_ENABLED=false
@@ -92,9 +92,6 @@ jobs:
             -f docker-compose.override.ci.yml \
             down -v 2>/dev/null || true
 
-          # Clean Journiv named volume cleanly
-          docker volume ls -q | grep "^journiv-${{ matrix.database }}" | xargs -r docker volume rm || true
-          docker volume prune -f || true
           echo "✅ Cleanup complete"
 
       - name: Start Journiv with Docker Compose
@@ -202,6 +199,4 @@ jobs:
             -f docker-compose.override.ci.yml \
             down -v || true
 
-          # Remove CI volume explicitly
-          docker volume rm journiv_ci_data >/dev/null 2>&1 || true
           echo "✅ Cleanup complete"
