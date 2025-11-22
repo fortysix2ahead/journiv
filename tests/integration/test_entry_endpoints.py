@@ -222,7 +222,7 @@ def test_cannot_move_entry_to_archived_journal(
         json={"journal_id": target_journal["id"]},
     )
 
-    assert response.status_code in [400, 422]
+    assert response.status_code == 422
 
     # Verify entry stayed in source journal
     fetched = api_client.get_entry(api_user.access_token, entry["id"])

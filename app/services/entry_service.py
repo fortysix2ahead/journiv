@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 from zoneinfo import ZoneInfo
 
-from app.core.exceptions import EntryNotFoundError, JournalNotFoundError
+from app.core.exceptions import EntryNotFoundError, JournalNotFoundError, ValidationError
 from app.core.logging_config import log_info, log_warning, log_error
 from app.core.time_utils import utc_now, local_date_for_user, ensure_utc, to_utc
 from app.models.entry import Entry, EntryMedia
@@ -232,7 +232,6 @@ class EntryService:
 
             # Prevent moving into archived journals
             if new_journal.is_archived:
-                from app.core.exceptions import ValidationError
                 log_warning(f"Cannot move entry {entry_id} to archived journal {new_journal.id}")
                 raise ValidationError("Cannot move entry to an archived journal")
 

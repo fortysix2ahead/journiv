@@ -257,9 +257,9 @@ async def update_entry(
     except EntryNotFoundError:
         raise HTTPException(status_code=404, detail="Entry not found")
     except JournalNotFoundError:
-        raise HTTPException(status_code=404, detail="Target journal not found")
+        raise HTTPException(status_code=404, detail="Target journal not found") from None
     except ValidationError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e)) from None
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
