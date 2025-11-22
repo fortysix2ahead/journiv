@@ -453,17 +453,23 @@ class Settings(BaseSettings):
         if make_url is not None:
             try:
                 parsed = make_url(url)
-                # Check if the driver name indicates PostgreSQL
                 driver_name = parsed.drivername or ""
                 # Remove driver suffix (e.g., "postgresql+asyncpg" -> "postgresql")
-                base_driver = driver_name.split("+")[0].lower()
+                base_driver = driver_name.split("+", 1)[0].lower()
                 return base_driver in ("postgresql", "postgres")
-            except Exception as e:
-                # Log the exception for debugging but fall through to string matching
-                logger.debug(f"Failed to parse URL with SQLAlchemy: {e}")
+            except Exception as exc:  # noqa: BLE001
+                # Avoid logging the URL or exception message; only log the type.
+                logger.debug(
+                    "Failed to parse database URL with SQLAlchemy (%s); falling back to scheme parsing.",
+                    type(exc).__name__,
+                )
 
-        # Fallback: string prefix matching for standard URLs
-        return url.startswith(("postgresql://", "postgres://"))
+        try:
+            scheme = url.split("://", 1)[0].lower()
+            base_scheme = scheme.split("+", 1)[0]
+            return base_scheme in ("postgresql", "postgres")
+        except (ValueError, IndexError):
+            return False
 
     @staticmethod
     def _sanitize_url(url: str) -> str:
@@ -486,9 +492,11 @@ class Settings(BaseSettings):
             try:
                 parsed = make_url(url)
                 return parsed.render_as_string(hide_password=True)
-            except Exception as e:
-                # Log the exception for debugging but fall through to manual masking
-                logger.debug(f"Failed to parse URL with SQLAlchemy for sanitization: {e}")
+            except Exception as exc:  # noqa: BLE001
+                logger.debug(
+                    "Failed to sanitize database URL with SQLAlchemy (%s); falling back to manual masking.",
+                    type(exc).__name__,
+                )
 
         # Fallback: manually mask password if present
         # Pattern: scheme://user:password@host/path
