@@ -86,8 +86,7 @@ def verify_token(token: str, token_type: str = "access") -> dict:
         if "sub" not in payload:
             raise JWTError("Token missing required 'sub' field")
         return payload
-    except ExpiredSignatureError as exc:
-        log_error(exc)
+    except ExpiredSignatureError:
         raise
     except JWTError as e:
         log_error(e)
