@@ -174,6 +174,18 @@ async def oidc_callback(
     if not subject:
         log_error("OIDC claims missing 'sub' field")
         raise HTTPException(status_code=400, detail="Invalid OIDC claims: missing subject")
+        
+    # SECURITY FIX: Require email to be verified by the IDP before allowing account linking/login
+    if email and not claims.get('email_verified', False):
+        log_error(f"OIDC login failed: Email {email} not verified by identity provider.", subject=subject)
+        raise HTTPException(
+            status_code=403, 
+            detail="Email not verified by identity provider"
+        )
+        
+    # SECURITY FIX: Normalize email to lowercase for reliable case-insensitive comparison
+    if email:
+        email = email.lower()
 
     # Get or create user from external identity
     user_service = UserService(session)
