@@ -51,6 +51,18 @@ class DayOneWeather(BaseModel):
     wind_speed_kph: Optional[float] = Field(None, alias="windSpeedKPH", ge=0)
     wind_bearing: Optional[int] = Field(None, alias="windBearing", ge=0, le=359)
 
+    @field_validator("wind_bearing", mode="before")
+    @classmethod
+    def validate_wind_bearing(cls, v: Optional[int]) -> Optional[int]:
+        """Normalize invalid wind bearings from Day One exports."""
+        if v is None:
+            return None
+        if v == 360:
+            return 0
+        if v < 0 or v > 359:
+            return None
+        return v
+
     class Config:
         populate_by_name = True
         extra = "allow"
