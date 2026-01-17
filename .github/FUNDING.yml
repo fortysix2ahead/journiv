@@ -1,7 +1,9 @@
 # These are supported funding model platforms
 
+custom: https://www.journiv.com/support
 github: swalabtech
 buy_me_a_coffee: journiv
+ko_fi: journiv
 patreon: # Replace with a single Patreon username
 open_collective: # Replace with a single Open Collective username
 tidelift: # Replace with a single Tidelift platform-name/package-name e.g., npm/babel
@@ -11,5 +13,3 @@ issuehunt: # Replace with a single IssueHunt username
 lfx_crowdfunding: # Replace with a single LFX Crowdfunding project-name e.g., cloud-foundry
 polar: # Replace with a single Polar username
 thanks_dev: # Replace with a single thanks.dev username
-custom: https://buy.stripe.com/4gM9AVeGk3lE6PbfYRffy00
-ko_fi: journiv
