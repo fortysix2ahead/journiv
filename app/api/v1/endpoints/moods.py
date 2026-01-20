@@ -35,7 +35,7 @@ router = APIRouter(prefix="/moods", tags=["moods"])
 async def get_all_moods(
     current_user: Annotated[User, Depends(get_current_user)],
     session: Annotated[Session, Depends(get_session)],
-    category: Optional[str] = Query(None, pattern="^(positive|negative|neutral)$")
+    category: Optional[str] = Query(None)
 ):
     """
     Get all system moods, optionally filtered by category.
@@ -44,11 +44,23 @@ async def get_all_moods(
     """
     mood_service = MoodService(session)
     try:
-        if category:
-            moods = mood_service.get_moods_by_category(category)
+        # Normalize empty string to None
+        normalized_category = category.strip() if category else None
+
+        # Validate category if provided
+        if normalized_category and normalized_category not in ["positive", "negative", "neutral"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid category. Must be one of: positive, negative, neutral"
+            )
+
+        if normalized_category:
+            moods = mood_service.get_moods_by_category(normalized_category)
         else:
             moods = mood_service.get_all_moods()
         return moods
+    except HTTPException:
+        raise
     except Exception as e:
         log_error(e, request_id="", user_email=current_user.email)
         raise HTTPException(
