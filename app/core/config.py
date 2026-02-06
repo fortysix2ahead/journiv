@@ -69,6 +69,7 @@ class Settings(BaseSettings):
     # When POSTGRES_PASSWORD is set, these components are used to construct the PostgreSQL URL
     postgres_user: Optional[str] = None
     postgres_password: Optional[str] = None
+    postgres_password_file: Optional[str] = None
     postgres_db: Optional[str] = None
     postgres_host: Optional[str] = None
     postgres_port: Optional[int] = None
@@ -77,6 +78,7 @@ class Settings(BaseSettings):
 
     # Security
     secret_key: str = ""  # Must be set via environment variable
+    secret_key_file: Optional[str] = None
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
     algorithm: str = "HS256"
@@ -86,6 +88,7 @@ class Settings(BaseSettings):
     oidc_issuer: str = "https://pocketid.example.com"
     oidc_client_id: str = "journiv-app"
     oidc_client_secret: str = "change_me"
+    oidc_client_secret_file: Optional[str] = None
     oidc_redirect_uri: Optional[str] = None
     oidc_scopes: str = "openid email profile"
     oidc_auto_provision: bool = True
@@ -251,6 +254,50 @@ class Settings(BaseSettings):
 
         # DB_DRIVER=sqlite: use DATABASE_URL (defaults to SQLite)
         return self.database_url
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        _settings_cls,
+        init_settings,
+        env_settings,
+        dotenv_settings,
+        file_secret_settings,
+    ):
+        """
+        Allow *_file fields to populate their base fields from a file path.
+        *_file must be a declared field on the model (e.g. secret_key_file).
+        Direct values (e.g. secret_key) override the file-based values.
+        *_file values are ordered to override secrets_dir values.
+        """
+        def file_env_settings() -> Dict[str, Any]:
+            data: Dict[str, Any] = {}
+            data.update(dotenv_settings() or {})
+            data.update(env_settings() or {})
+
+            for key, value in list(data.items()):
+                if not (isinstance(key, str) and key.endswith("_file")):
+                    continue
+                if not isinstance(value, str) or not value.strip():
+                    continue
+                base = key[: -len("_file")]
+                if base in data and data[base] not in (None, ""):
+                    logger.warning(f"{base} is set directly; ignoring {key}")
+                    continue
+                try:
+                    with open(value, "r", encoding="utf-8") as handle:
+                        data[base] = handle.read().rstrip("\r\n")
+                    logger.warning(f"{base} loaded from {value}")
+                except OSError as exc:
+                    logger.warning(f"Failed to read secret file {value}: {exc}")
+            return data
+
+        # Precedence (first source = highest priority): init > env > *_FILE secrets > secrets dir > defaults
+        return (
+            init_settings,
+            file_env_settings,
+            file_secret_settings,
+        )
 
     @field_validator('secret_key')
     @classmethod
