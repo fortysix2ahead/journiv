@@ -7,11 +7,12 @@
 
 
 Journiv is a self-hosted private journal. It features comprehensive journaling capabilities including mood tracking, prompt-based journaling, media uploads, analytics, and advanced search with a clean and minimal UI.
-<!-- <p align="center">
-  <a href="https://journiv.substack.com/" target="_blank">
-    <img src="https://img.shields.io/badge/📬%20Subscribe%20to%20Journiv%20Latest%20Updates%20on%20Substack-1E1E1E?style=for-the-badge&logo=substack&logoColor=FF6719&labelColor=1E1E1E&color=FF6719" alt="Subscribe to Journiv Latest Updates on Substack">
+
+<p align="center">
+  <a href="https://www.pikapods.com/pods?run=journiv" target="_blank">
+    <img src="https://www.pikapods.com/static/run-button.svg" alt="Run on PikaPods">
   </a>
-</p> -->
+</p>
 
 <p align="center">
   <a href="https://journiv.com" target="_blank">
